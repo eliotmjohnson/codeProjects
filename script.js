@@ -1,23 +1,17 @@
+import {
+	saveToLocalStorage,
+	deleteTodoFromLocalStorage,
+	getTodosFromLocalStorage,
+} from "./localStorage.js";
+
 const listContainer = document.querySelector(".todo-list");
 const todoInput = document.querySelector(".todo-input");
 const todoForm = document.querySelector(".todo-form");
-const submitButton = document.querySelector(".submit-button");
 
-//// Stuff we gotta do /////
-// 1. type something
-// -- get value
-//     --- evt.target = input.value
-// 2. click submit
-// -- prevent browser defaults
-//     --- evt.preventDefault()
-// -- capture the input
-//     --- assign input.value to const
-// 3. list item will show up
-// -- take text and assign it to the new todo item
-// -- we need to create and add the buttons
-// -- attach everything to the list
-// -- send the data to local storage
-// 4. Clear the input
+const initLoad = () => {
+	const storedTodos = getTodosFromLocalStorage();
+	storedTodos.forEach((todo) => createTodoElement(todo));
+};
 
 const getInput = (e) => {
 	const inputValue = e.target[0].value;
@@ -31,20 +25,21 @@ const validateInput = (inputText) => {
 	} else return true;
 };
 
-const checkTodo = (e) => {
-  console.log('checked')
-}
+const checkTodo = (todoItem) => {
+	todoItem.classList.toggle("checked");
+};
 
 const deleteTodo = (id) => {
-    const elements = Array.from(listContainer.children)
-    const todoToDelete = elements.find(todo => todo.id === id)
-    todoToDelete.remove()
-}
+	const elements = Array.from(listContainer.children);
+	const todoToDelete = elements.find((todo) => todo.id === id);
+	todoToDelete.remove();
+	deleteTodoFromLocalStorage(todoToDelete.children[0].textContent);
+};
 
 const createTodoElement = (input) => {
 	const listItem = document.createElement("li");
 	listItem.classList.add("todo-item");
-    listItem.id = Date.now()
+	listItem.id = Date.now();
 
 	const itemText = document.createElement("p");
 	itemText.textContent = input;
@@ -55,14 +50,16 @@ const createTodoElement = (input) => {
 	const checkButton = document.createElement("button");
 	checkButton.classList.add("check");
 	checkButton.textContent = "✓";
-	checkButton.addEventListener("click", checkTodo);
+	checkButton.addEventListener("click", () => {
+		checkTodo(listItem);
+	});
 
 	const deleteButton = document.createElement("button");
 	deleteButton.classList.add("delete");
 	deleteButton.textContent = "X";
 	deleteButton.addEventListener("click", () => {
-        deleteTodo(listItem.id)
-    });
+		deleteTodo(listItem.id);
+	});
 
 	buttonContainer.append(checkButton, deleteButton);
 	listItem.append(itemText, buttonContainer);
@@ -80,6 +77,7 @@ const submitTodo = (e) => {
 	try {
 		if (isValid) {
 			createTodoElement(input);
+			saveToLocalStorage(input);
 		} else {
 			throw new Error("You must enter text before submitting!");
 		}
@@ -90,3 +88,4 @@ const submitTodo = (e) => {
 };
 
 todoForm.addEventListener("submit", submitTodo);
+initLoad();

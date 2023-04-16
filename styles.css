@@ -93,6 +93,10 @@ body {
     font-size: 1.4rem;
 }
 
+.checked p {
+    text-decoration: line-through;
+}
+
 .button-container {
     display: flex;
     gap: 1rem;
